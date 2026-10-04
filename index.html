@@ -1,0 +1,1444 @@
+<!DOCTYPE html>
+<html lang="pt">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
+<meta name="theme-color" content="#000000">
+<title>PlantasApp — Carteira</title>
+<style>
+:root{
+  --bg:#000;
+  --surface:#101010;
+  --surface2:#171717;
+  --line:#262626;
+  --text:#fff;
+  --muted:#a9a9a9;
+  --pink:#ff174f;
+  --pink2:#ff2d78;
+  --green:#00c853;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{background:#000;color:var(--text);font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Arial,sans-serif}
+body{max-width:430px;min-height:100vh;margin:auto;overflow-x:hidden}
+button,input{font:inherit}
+button{cursor:pointer}
+
+.app{min-height:100vh;background:#000;padding-bottom:76px}
+.header{
+  height:76px;padding:8px 18px 10px;display:flex;align-items:center;
+  justify-content:space-between;background:#000;position:sticky;top:0;z-index:20
+}
+.icon-btn{border:0;background:transparent;color:#fff;font-size:27px;width:42px;height:42px}
+.logo{
+  display:flex;align-items:center;gap:4px;font-weight:800;font-size:22px;
+  letter-spacing:-1px
+}
+.logo-mark{font-size:38px;line-height:1;color:#fff;text-shadow:-2px 0 #22f3ee,2px 0 #ff174f}
+.logo-small{font-size:17px;letter-spacing:-1px}
+.bell{font-size:25px}
+
+.page{display:none;padding:0 12px 18px}
+.page.active{display:block}
+
+.balance{
+  margin:10px 0 18px;padding:20px 22px 19px;border-radius:25px;
+  background:linear-gradient(135deg,#ff3947 0%,#ff176d 100%);
+  box-shadow:0 8px 28px rgba(255,23,80,.20)
+}
+.balance .label{font-size:16px;opacity:.92}
+.balance .amount{font-size:43px;font-weight:800;letter-spacing:-1.5px;margin:5px 0 17px}
+.balance .amount{cursor:pointer;user-select:none}
+.balance .amount:active{transform:scale(.99);opacity:.9}
+.stats{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px}
+.stats div{font-size:13px;color:#fff;cursor:pointer}
+.stats b{display:block;font-size:16px;margin-top:3px}
+.stats b.editable-value{display:block}
+
+.section-title{
+  display:flex;align-items:center;justify-content:space-between;
+  margin:0 2px 10px;font-size:22px;font-weight:800
+}
+.more{color:var(--pink2);font-size:15px;font-weight:600}
+
+.earn-list{display:grid;gap:9px;margin-bottom:24px}
+.earn{
+  min-height:61px;background:#111;border-radius:15px;padding:0 20px;
+  display:flex;align-items:center;justify-content:space-between
+}
+.earn span:first-child{font-size:16px}
+.earn .money{color:var(--pink2);font-size:17px;font-weight:800}
+
+.video-row{display:grid;grid-template-columns:1.25fr 1fr 1fr;gap:10px;overflow:hidden}
+.video{
+  height:176px;border-radius:13px;background:#1b1b1b;overflow:hidden;position:relative
+}
+.video img{width:100%;height:100%;object-fit:cover;display:block}
+.video .play{
+  position:absolute;left:10px;bottom:10px;width:34px;height:34px;border-radius:50%;
+  background:rgba(0,0,0,.68);display:grid;place-items:center;font-size:14px
+}
+
+.video-count{
+  position:absolute;left:8px;top:8px;background:rgba(0,0,0,.72);
+  padding:4px 7px;border-radius:8px;font-size:10px;font-weight:700
+}
+.video-duration{
+  position:absolute;right:8px;bottom:8px;background:rgba(0,0,0,.78);
+  padding:4px 7px;border-radius:8px;font-size:11px;font-weight:800
+}
+.video-delete{
+  position:absolute;right:7px;top:7px;width:28px;height:28px;border:0;
+  border-radius:50%;background:rgba(0,0,0,.78);color:#fff;font-size:16px;
+  line-height:28px;padding:0;z-index:4
+}
+.video-delete:hover{background:#d41445}
+.video-add-btn{
+  width:auto;height:38px;padding:0 15px;border:0;border-radius:10px;
+  background:var(--pink);color:#fff;font-size:14px;font-weight:800;margin:0
+}
+.video-tools{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:10px}
+.video-tools .section-title{margin:0}
+
+.card{
+  background:linear-gradient(145deg,#202020,#0d0d0d);
+  border:1px solid #2b2b2b;border-radius:20px;padding:20px;margin-bottom:14px;
+  box-shadow:0 12px 30px rgba(0,0,0,.35)
+}
+.virtual-card{
+  min-height:205px;border:0;border-radius:20px;padding:21px;
+  background:linear-gradient(135deg,#ff3157,#ff176f 55%,#b10045);
+  position:relative;overflow:hidden
+}
+.virtual-card:after{
+  content:"";position:absolute;width:170px;height:170px;border-radius:50%;
+  border:1px solid rgba(255,255,255,.16);right:-45px;bottom:-65px
+}
+.vc-top{display:flex;justify-content:space-between;font-weight:800}
+.chip{width:43px;height:32px;border-radius:8px;background:linear-gradient(135deg,#eee,#aaa);margin-top:27px}
+.vc-number{font-size:21px;letter-spacing:2px;margin-top:22px}
+.vc-bottom{display:flex;justify-content:space-between;margin-top:16px;font-size:12px;text-transform:uppercase}
+.vc-bottom b{display:block;font-size:14px;margin-top:3px}
+
+.form-card{background:#101010;border-radius:18px;padding:17px}
+.field{margin-bottom:13px}
+.field label{display:block;color:#aaa;font-size:13px;margin-bottom:7px}
+.field input{
+  width:100%;height:48px;background:#080808;border:1px solid #303030;border-radius:11px;
+  color:#fff;padding:0 13px;outline:none
+}
+.field input:focus{border-color:var(--pink)}
+.row{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.primary{
+  width:100%;height:50px;border:0;border-radius:12px;background:var(--pink);
+  color:#fff;font-weight:800;margin-top:3px
+}
+.secondary{
+  width:100%;height:48px;border:1px solid #333;border-radius:12px;
+  background:#111;color:#fff;font-weight:700;margin-top:10px
+}
+.notice{font-size:12px;line-height:1.45;color:#999;margin-top:10px}
+.fake-badge{
+  display:inline-block;font-size:10px;padding:4px 7px;border-radius:99px;
+  background:#292929;color:#bbb;margin-bottom:8px
+}
+
+.withdraw-options{display:grid;gap:10px}
+.option{
+  padding:16px;background:#111;border:1px solid #292929;border-radius:15px;
+  display:flex;align-items:center;gap:13px
+}
+.option .ico{
+  width:43px;height:43px;border-radius:12px;background:#1d1d1d;
+  display:grid;place-items:center;font-size:21px
+}
+.option h4{font-size:15px}.option p{color:#999;font-size:12px;margin-top:3px}
+.option.active{border-color:var(--pink);background:#171015}
+
+.profile{text-align:center;padding-top:10px}
+.avatar{width:76px;height:76px;border-radius:50%;background:#222;display:grid;place-items:center;font-size:31px;margin:0 auto 10px}
+.profile h2{font-size:21px}.profile p{color:#888;margin-top:4px}
+.profile-list{margin-top:20px;display:grid;gap:9px;text-align:left}
+.profile-item{background:#111;padding:16px;border-radius:13px;display:flex;justify-content:space-between}
+
+.bottom{
+  position:fixed;left:50%;bottom:0;transform:translateX(-50%);width:min(430px,100%);
+  height:76px;background:#050505;border-top:1px solid #171717;
+  display:grid;grid-template-columns:repeat(5,1fr);z-index:30
+}
+.nav{
+  border:0;background:transparent;color:#8f8f8f;font-size:11px;
+  display:flex;flex-direction:column;align-items:center;justify-content:center;gap:5px
+}
+.nav .ni{font-size:24px;line-height:1}
+.nav.active{color:var(--pink)}
+
+.balance-editor{position:fixed;inset:0;background:rgba(0,0,0,.82);display:none;align-items:flex-end;justify-content:center;z-index:60;padding:14px}
+.balance-editor.show{display:flex}
+.balance-editor-box{width:min(430px,100%);background:#121212;border:1px solid #292929;border-radius:22px;padding:20px;box-shadow:0 -10px 40px rgba(0,0,0,.45)}
+.balance-editor-box h2{font-size:21px;margin-bottom:5px}
+.balance-editor-box p{font-size:12px;color:#999;margin-bottom:15px}
+.balance-editor-box input{height:52px;font-size:22px;font-weight:700}
+.editor-actions{display:grid;grid-template-columns:1fr 1fr;gap:9px}
+.editor-actions button{margin-top:10px}
+.danger{background:#242424!important;color:#ff5579!important}
+.toast{
+  position:fixed;left:50%;bottom:88px;transform:translateX(-50%) translateY(20px);
+  background:#242424;color:#fff;padding:12px 16px;border-radius:12px;
+  font-size:13px;opacity:0;pointer-events:none;transition:.25s;z-index:50;
+  width:max-content;max-width:90%
+}
+.toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+
+.editable-value{cursor:pointer;border-bottom:1px dashed rgba(255,255,255,.35);transition:.2s}
+.editable-value:active,.editable-value:hover{border-color:#ff174f}
+.edit-hint{font-size:10px;color:#fff;opacity:.65;margin-top:4px}
+.manage-modal{position:fixed;inset:0;background:rgba(0,0,0,.88);z-index:80;display:none;align-items:flex-end;justify-content:center}
+.manage-modal.show{display:flex}
+.manage-sheet{width:min(430px,100%);max-height:92vh;overflow:auto;background:#111;border-radius:24px 24px 0 0;padding:20px 16px 28px;border-top:1px solid #292929}
+.sheet-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:16px}
+.sheet-head h2{font-size:21px}.close-btn{border:0;background:#222;color:#fff;width:36px;height:36px;border-radius:50%;font-size:20px}
+.manage-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.manage-item{background:#181818;border:1px solid #292929;border-radius:14px;padding:13px}
+.manage-item label{display:block;color:#aaa;font-size:11px;margin-bottom:6px}.manage-item input,.manage-sheet select{width:100%;height:44px;background:#080808;border:1px solid #333;color:#fff;border-radius:10px;padding:0 10px;outline:none}
+.manage-full{margin-top:10px}.manage-actions{display:flex;gap:10px;margin-top:14px}.manage-actions button{flex:1}
+.earn-manage{margin-top:18px}.earn-manage h3{font-size:16px;margin-bottom:9px}.saved-gain{background:#181818;border-radius:12px;padding:11px;margin:7px 0;display:flex;justify-content:space-between;gap:8px;font-size:12px}.saved-gain b{color:#ff2d78}
+.gallery-modal{position:fixed;inset:0;background:rgba(0,0,0,.9);z-index:85;display:none;align-items:flex-end}.gallery-modal.show{display:flex}
+.gallery-sheet{width:min(430px,100%);background:#111;border-radius:24px 24px 0 0;padding:20px 16px 28px}.gallery-sheet input[type=file]{width:100%;padding:13px;background:#080808;border:1px dashed #444;border-radius:12px;color:#aaa}
+.upload-preview{display:none;margin-top:12px}.upload-preview img{width:100%;height:150px;object-fit:cover;border-radius:12px}
+.video.clickable{cursor:pointer}.video-duration{position:absolute;right:8px;bottom:8px;background:rgba(0,0,0,.8);border-radius:8px;padding:7px 9px;font-size:12px;font-weight:800;color:#fff}
+.video-count{position:absolute;left:8px;top:8px;background:#000b;border-radius:8px;padding:5px 7px;font-size:11px}
+@media(max-width:350px){
+  .balance .amount{font-size:37px}.earn{padding:0 13px}
+}
+
+.flow-modal{
+  position:fixed;inset:0;background:rgba(0,0,0,.96);z-index:100;
+  display:none;align-items:center;justify-content:center;padding:18px
+}
+.flow-modal.show{display:flex}
+.flow-box{
+  width:min(430px,100%);min-height:100%;display:flex;align-items:center;
+  justify-content:center;text-align:center
+}
+.flow-step{display:none;width:100%;animation:fade .25s ease}
+.flow-step.active{display:block}
+.flow-step h1{font-size:30px;line-height:1.08;margin:15px 0 10px}
+.flow-step h2{font-size:25px;margin:15px 0 8px}
+.flow-step p{color:#aaa;font-size:14px;line-height:1.5;max-width:330px;margin:0 auto 18px}
+.flow-icon{
+  width:78px;height:78px;border-radius:50%;background:#202020;
+  display:grid;place-items:center;margin:0 auto;font-size:35px
+}
+.spinner,.big-spinner{
+  border:4px solid #303030;border-top-color:#ff174f;border-radius:50%;
+  animation:spin 1s linear infinite;margin:0 auto
+}
+.spinner{width:58px;height:58px}
+.big-spinner{width:82px;height:82px;border-width:6px}
+.progress{height:8px;background:#242424;border-radius:99px;overflow:hidden;margin:24px auto 12px;max-width:330px}
+#progressBar{height:100%;width:0;background:linear-gradient(90deg,#ff174f,#ff2d78);transition:width .35s}
+.flow-step small{display:block;color:#666;font-size:11px}
+.confirm-card,.summary,.success-card{
+  background:#111;border:1px solid #2b2b2b;border-radius:16px;
+  padding:16px;text-align:left;margin:14px auto;max-width:350px
+}
+.confirm-card{display:flex;justify-content:space-between}
+.summary div,.success-card div{
+  display:flex;justify-content:space-between;gap:15px;padding:10px 0;
+  border-bottom:1px solid #222;font-size:13px
+}
+.summary div:last-child,.success-card div:last-child{border-bottom:0}
+.summary span,.success-card span{color:#999}
+.success-mark{
+  width:94px;height:94px;border-radius:50%;background:#00c853;
+  color:#fff;font-size:55px;display:grid;place-items:center;margin:0 auto
+}
+.success-card{background:#0e0e0e}
+.success-card strong{font-size:14px}
+.success-card .ok{color:#00c853}
+@keyframes spin{to{transform:rotate(360deg)}}
+@keyframes fade{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
+</style>
+</head>
+
+<body>
+<div class="app">
+
+<header class="header">
+  <button class="icon-btn" onclick="showToast('Menu demonstrativo')">☰</button>
+  <div class="logo"><span class="logo-mark">♪</span><span class="logo-small">kTok</span></div>
+  <button class="icon-btn bell" onclick="openManage()">⋮</button>
+</header>
+
+<main id="home" class="page active">
+  <section class="balance">
+    <div class="label">Saldo disponível</div>
+    <div class="amount" id="balanceValue" onclick="openBalanceEditor()" title="Clique para editar">$ 79,28</div>
+
+    <div class="stats">
+      <div onclick="editMoney('yesterday')">
+        Ontem
+        <b id="yesterdayValue" class="editable-value">+$0,00</b>
+      </div>
+
+      <div onclick="editMoney('anteYesterday')">
+        Anteontem
+        <b id="anteYesterdayValue" class="editable-value">+$0,00</b>
+      </div>
+
+      <div onclick="editMoney('month')">
+        Mês
+        <b id="monthValue" class="editable-value">+$89,28</b>
+      </div>
+    </div>
+  </section>
+
+  <div class="section-title">Últimos ganhos</div>
+
+  <div class="earn-list" id="earnList">
+    <div class="earn"><span>Curtiu um vídeo</span><span class="money editable-value" onclick="editGain(this)">+$0,01</span></div>
+    <div class="earn"><span>Assistiu um vídeo</span><span class="money editable-value" onclick="editGain(this)">+$0,02</span></div>
+    <div class="earn"><span>Assistiu um vídeo</span><span class="money editable-value" onclick="editGain(this)">+$0,03</span></div>
+    <div class="earn"><span>Assistiu um vídeo</span><span class="money editable-value" onclick="editGain(this)">+$0,02</span></div>
+    <div class="earn"><span>Assistiu um vídeo</span><span class="money editable-value" onclick="editGain(this)">+$0,02</span></div>
+    <div class="earn"><span>Assistiu um vídeo</span><span class="money editable-value" onclick="editGain(this)">+$0,02</span></div>
+  </div>
+
+  <div class="video-tools">
+    <div class="section-title"><span>Últimos vídeos assistidos</span></div>
+    <button class="video-add-btn" onclick="openGallery()">＋ Adicionar</button>
+  </div>
+
+  <div class="video-row" id="videoRow">
+    <div class="video"><img src="1000249929.jpg" alt="Imagem de referência"><div class="play">▶</div><div class="video-count">Vídeo 1</div><div class="video-duration">30s</div><button class="video-delete" onclick="removeVideo(this,event)" aria-label="Eliminar vídeo">×</button></div>
+    <div class="video"><img src="1000249929.jpg" alt="Imagem de referência"><div class="play">▶</div><div class="video-count">Vídeo 2</div><div class="video-duration">30s</div><button class="video-delete" onclick="removeVideo(this,event)" aria-label="Eliminar vídeo">×</button></div>
+    <div class="video"><img src="1000249929.jpg" alt="Imagem de referência"><div class="play">▶</div><div class="video-count">Vídeo 3</div><div class="video-duration">30s</div><button class="video-delete" onclick="removeVideo(this,event)" aria-label="Eliminar vídeo">×</button></div>
+  </div>
+</main>
+
+<main id="withdraw" class="page">
+  <div class="section-title"><span>Levantamento</span></div>
+
+  <div class="card">
+    <div class="fake-badge">CARTÃO VIRTUAL</div>
+    <h2 style="margin-bottom:6px">Levantamento para cartão</h2>
+    <p style="color:#999;font-size:13px;margin-bottom:14px">O levantamento será processado através do cartão virtual de demonstração.</p>
+
+    <div class="virtual-card" style="min-height:170px;margin-bottom:15px">
+      <div class="vc-top"><span>PLANTASAPP</span><span>VIRTUAL</span></div>
+      <div class="chip"></div>
+      <div class="vc-number">•••• •••• •••• 4821</div>
+      <div class="vc-bottom">
+        <div>Titular<b id="withdrawCardName">NOME DEMO</b></div>
+        <div>Validade<b id="withdrawCardExpiry">12/30</b></div>
+      </div>
+    </div>
+
+    <div class="field">
+      <label>Valor do levantamento</label>
+      <input id="withdrawAmount" type="number" min="1" step="0.01" placeholder="Ex.: 20,00">
+    </div>
+    <button class="primary" onclick="startWithdraw()">Continuar levantamento</button>
+    <div class="notice">Fluxo de demonstração. Nenhuma transação financeira real é realizada.</div>
+  </div>
+</main>
+
+<!-- PAINEL DOS TRÊS PONTOS -->
+<div id="manageModal" class="manage-modal" aria-hidden="true">
+  <div class="manage-sheet">
+
+    <div class="sheet-head">
+      <h2>Editar valores</h2>
+      <button class="close-btn" onclick="closeManage()">×</button>
+    </div>
+
+    <div class="manage-grid">
+
+      <div class="manage-item">
+        <label>Saldo total (US$)</label>
+        <input id="manageBalance" type="number" step="0.01" min="0">
+      </div>
+
+      <div class="manage-item">
+        <label>Ontem (US$)</label>
+        <input id="manageYesterday" type="number" step="0.01" min="0">
+      </div>
+
+      <div class="manage-item">
+        <label>Anteontem (US$)</label>
+        <input id="manageAnteYesterday" type="number" step="0.01" min="0">
+      </div>
+
+      <div class="manage-item">
+        <label>Este mês (US$)</label>
+        <input id="manageMonth" type="number" step="0.01" min="0">
+      </div>
+
+    </div>
+
+    <div class="manage-actions">
+      <button class="secondary" onclick="closeManage()">Cancelar</button>
+      <button class="primary" onclick="saveAllValues()">Salvar valores</button>
+    </div>
+
+    <div class="earn-manage">
+      <h3>Adicionar ganho</h3>
+
+      <div class="manage-grid">
+        <div class="manage-item">
+          <label>Valor por vídeo (US$)</label>
+          <input id="gainValue" type="number" step="0.01" min="0" placeholder="0,02">
+        </div>
+
+        <div class="manage-item">
+          <label>Quantidade de vídeos</label>
+          <input id="gainVideos" type="number" step="1" min="1" placeholder="1">
+        </div>
+      </div>
+
+      <div class="manage-item manage-full">
+        <label>Hora</label>
+        <input id="gainTime" type="time">
+      </div>
+
+      <div class="manage-item manage-full">
+        <label>Descrição</label>
+        <input id="gainDescription" type="text" maxlength="40" placeholder="Assistiu um vídeo">
+      </div>
+
+      <div class="manage-actions">
+        <button class="primary" onclick="saveGain()">Salvar ganho</button>
+      </div>
+
+      <div id="savedGains"></div>
+    </div>
+
+  </div>
+</div>
+
+<div id="galleryModal" class="gallery-modal" aria-hidden="true">
+  <div class="gallery-sheet">
+    <div class="sheet-head"><h2>Adicionar vídeo</h2><button class="close-btn" onclick="closeGallery()">×</button></div>
+    <p class="notice" style="margin:0 0 12px">Escolha uma imagem da galeria e defina quantos segundos aparecem no botão do vídeo.</p>
+    <input id="imagePicker" type="file" accept="image/*">
+    <div class="upload-preview" id="uploadPreview"><img id="previewImage" alt="Pré-visualização"></div>
+    <div class="manage-item manage-full"><label>Duração do vídeo (segundos)</label><input id="videoSeconds" type="number" min="1" max="3600" value="30"></div>
+    <button class="primary" onclick="saveImportedImage()">Importar e salvar</button>
+  </div>
+</div>
+
+<div id="withdrawModal" class="flow-modal" aria-hidden="true">
+  <div class="flow-box">
+
+    <div id="flowStep1" class="flow-step active">
+      <div class="spinner"></div>
+      <h2>Preparando levantamento</h2>
+      <p>Verificando o pedido...</p>
+    </div>
+
+    <div id="flowStep2" class="flow-step">
+      <div class="flow-icon">💳</div>
+      <h2>Confirmar cartão</h2>
+      <p>Confirme o cartão virtual selecionado para continuar o processamento.</p>
+      <div class="confirm-card">
+        <span>Cartão virtual</span>
+        <strong>•••• 4821</strong>
+      </div>
+      <button class="primary" onclick="confirmCard()">Confirmar cartão</button>
+    </div>
+
+    <div id="flowStep3" class="flow-step">
+      <div class="big-spinner"></div>
+      <h2>Processando levantamento</h2>
+      <p id="processingText">Validando os dados do pedido...</p>
+      <div class="progress"><div id="progressBar"></div></div>
+      <small>Não feche esta tela enquanto o processamento estiver em andamento.</small>
+    </div>
+
+    <div id="flowStep4" class="flow-step">
+      <div class="flow-icon">✓</div>
+      <h2>Confirmar pagamento</h2>
+      <p>O processamento foi concluído. Confirme para finalizar o levantamento.</p>
+
+      <div class="summary">
+        <div><span>Valor</span><b id="confirmAmount">$ 0,00</b></div>
+        <div><span>Destino</span><b>Cartão virtual</b></div>
+        <div><span>Status</span><b>Pronto para confirmar</b></div>
+      </div>
+
+      <button class="primary" onclick="finishWithdraw()">Confirmar pagamento</button>
+    </div>
+
+    <div id="flowStep5" class="flow-step success-screen">
+      <div class="success-mark">✓</div>
+      <h1>Levantamento com sucesso!</h1>
+      <p>O pedido foi confirmado e registrado no sistema de demonstração.</p>
+
+      <div class="success-card">
+        <div><span>Valor levantado</span><strong id="successAmount">$ 0,00</strong></div>
+        <div><span>Destino</span><strong>Cartão virtual</strong></div>
+        <div><span>Referência</span><strong id="successRef">VG-000000</strong></div>
+        <div><span>Data</span><strong id="successDate">--/--/----</strong></div>
+        <div><span>Hora</span><strong id="successTime">--:--</strong></div>
+        <div><span>Estado</span><strong class="ok">CONCLUÍDO</strong></div>
+      </div>
+
+      <button class="primary" onclick="closeWithdraw()">Voltar à carteira</button>
+    </div>
+
+  </div>
+</div>
+
+<main id="card" class="page">
+  <div class="section-title"><span>Cartão virtual</span></div>
+
+  <div class="virtual-card">
+    <div class="vc-top"><span>PLANTASAPP</span><span>VIRTUAL</span></div>
+    <div class="chip"></div>
+    <div class="vc-number">•••• •••• •••• 4821</div>
+    <div class="vc-bottom">
+      <div>Titular<b id="cardNameView">NOME DEMO</b></div>
+      <div>Validade<b id="cardExpiryView">12/30</b></div>
+    </div>
+  </div>
+
+  <div class="form-card">
+    <div class="fake-badge">CARTÃO DE TESTE</div>
+    <h3 style="margin-bottom:5px">Informações do cartão</h3>
+    <p class="notice" style="margin:0 0 14px">Use somente dados fictícios neste protótipo. O formulário não guarda nem envia dados de cartão.</p>
+
+    <div class="field">
+      <label>Nome do titular</label>
+      <input id="cardName" autocomplete="off" placeholder="NOME DEMO">
+    </div>
+
+    <div class="field">
+      <label>Número do cartão de teste</label>
+      <input id="cardNumber" inputmode="numeric" autocomplete="off" placeholder="1111 2222 3333 4444">
+    </div>
+
+    <div class="row">
+      <div class="field">
+        <label>Validade</label>
+        <input id="cardExpiry" inputmode="numeric" placeholder="12/30">
+      </div>
+
+      <div class="field">
+        <label>CVV de teste</label>
+        <input id="cardCvv" inputmode="numeric" autocomplete="off" placeholder="123">
+      </div>
+    </div>
+
+    <button class="primary" onclick="saveDemoCard()">Atualizar cartão de teste</button>
+    <button class="secondary" onclick="clearDemoCard()">Limpar campos</button>
+  </div>
+</main>
+
+<main id="profile" class="page">
+  <div class="profile">
+    <div class="avatar">👤</div>
+    <h2>Usuário Demo</h2>
+    <p>conta@exemplo.test</p>
+  </div>
+
+  <div class="profile-list">
+    <div class="profile-item"><span>Conta</span><span>›</span></div>
+    <div class="profile-item"><span>Notificações</span><span>›</span></div>
+    <div class="profile-item"><span>Termos e segurança</span><span>›</span></div>
+  </div>
+</main>
+
+<nav class="bottom">
+  <button class="nav active" data-page="home"><span class="ni">⌂</span>Início</button>
+  <button class="nav" data-page="videos"><span class="ni">▷</span>Vídeos</button>
+  <button class="nav" data-page="withdraw"><span class="ni">$</span>Ganhar</button>
+  <button class="nav" data-page="card"><span class="ni">▣</span>Carteira</button>
+  <button class="nav" data-page="profile"><span class="ni">♙</span>Perfil</button>
+</nav>
+
+</div>
+
+<div id="balanceEditor" class="balance-editor" aria-hidden="true">
+  <div class="balance-editor-box">
+    <h2>Editar saldo</h2>
+    <p>Digite manualmente o novo saldo. O valor ficará guardado neste dispositivo.</p>
+
+    <div class="field">
+      <label>Novo saldo (USD)</label>
+      <input id="newBalance" type="number" min="0" step="0.01" inputmode="decimal" placeholder="0,00">
+    </div>
+
+    <div class="editor-actions">
+      <button class="secondary" onclick="closeBalanceEditor()">Cancelar</button>
+      <button class="primary" onclick="saveBalance()">Salvar saldo</button>
+    </div>
+
+    <button class="secondary danger" onclick="clearBalance()">Limpar saldo</button>
+  </div>
+</div>
+
+<div id="toast" class="toast"></div>
+
+<script>
+const pages={
+  home:document.getElementById('home'),
+  withdraw:document.getElementById('withdraw'),
+  card:document.getElementById('card'),
+  profile:document.getElementById('profile')
+};
+
+const STORAGE='plantasapp_demo_v5';
+
+let state=JSON.parse(localStorage.getItem(STORAGE)||'null')||{
+  balance:79.28,
+  today:0,
+  yesterday:0,
+  anteYesterday:0,
+  month:89.28,
+
+  gains:[
+    {id:'g1',value:.01,videos:1,time:'',description:'Curtiu um vídeo'},
+    {id:'g2',value:.02,videos:1,time:'',description:'Assistiu um vídeo'},
+    {id:'g3',value:.03,videos:1,time:'',description:'Assistiu um vídeo'},
+    {id:'g4',value:.02,videos:1,time:'',description:'Assistiu um vídeo'},
+    {id:'g5',value:.02,videos:1,time:'',description:'Assistiu um vídeo'},
+    {id:'g6',value:.02,videos:1,time:'',description:'Assistiu um vídeo'}
+  ],
+
+  images:[]
+};
+
+let selectedWithdrawAmount=0;
+let flowTimer=null;
+
+
+/* ==========================
+   FORMATAÇÃO
+========================== */
+
+function money(v,plus=false){
+  return (plus?'+':'')+'$ '+Number(v||0).toFixed(2).replace('.',',');
+}
+
+function save(){
+  localStorage.setItem(STORAGE,JSON.stringify(state));
+}
+
+
+/* ==========================
+   RENDER
+========================== */
+
+function render(){
+
+  document.getElementById('balanceValue').textContent=
+    money(state.balance);
+
+  document.getElementById('yesterdayValue').textContent=
+    money(state.yesterday,true);
+
+  document.getElementById('anteYesterdayValue').textContent=
+    money(state.anteYesterday,true);
+
+  document.getElementById('monthValue').textContent=
+    money(state.month,true);
+
+  renderGains();
+  renderImages();
+}
+
+
+/* ==========================
+   EDITAR SALDO PRINCIPAL
+========================== */
+
+function openBalanceEditor(){
+
+  document.getElementById('newBalance').value=
+    Number(state.balance).toFixed(2);
+
+  document.getElementById('balanceEditor').classList.add('show');
+
+  document.getElementById('balanceEditor').setAttribute(
+    'aria-hidden','false'
+  );
+}
+
+
+function closeBalanceEditor(){
+
+  document.getElementById('balanceEditor').classList.remove('show');
+
+  document.getElementById('balanceEditor').setAttribute(
+    'aria-hidden','true'
+  );
+}
+
+
+function saveBalance(){
+
+  const value=Number(
+    String(document.getElementById('newBalance').value)
+    .replace(',','.')
+  );
+
+  if(!Number.isFinite(value)||value<0){
+
+    showToast('Valor inválido');
+    return;
+  }
+
+  state.balance=value;
+
+  save();
+  render();
+  closeBalanceEditor();
+
+  showToast('Saldo atualizado e salvo');
+}
+
+
+function clearBalance(){
+
+  state.balance=0;
+
+  save();
+  render();
+  closeBalanceEditor();
+
+  showToast('Saldo zerado');
+}
+
+
+/* ==========================
+   EDITAR ONTEM / ANTEONTEM / MÊS
+========================== */
+
+function editMoney(key){
+
+  const labels={
+    yesterday:'Ontem',
+    anteYesterday:'Anteontem',
+    month:'Este mês'
+  };
+
+  const raw=prompt(
+    'Digite o novo valor de '+labels[key]+' em US$:',
+    Number(state[key]||0).toFixed(2)
+  );
+
+  if(raw===null)return;
+
+  const value=Number(
+    String(raw).replace(',','.')
+  );
+
+  if(!Number.isFinite(value)||value<0){
+
+    showToast('Valor inválido');
+    return;
+  }
+
+  state[key]=value;
+
+  save();
+  render();
+
+  showToast(labels[key]+' atualizado e salvo');
+}
+
+
+/* ==========================
+   PAINEL DOS TRÊS PONTOS
+========================== */
+
+function openManage(){
+
+  document.getElementById('manageBalance').value=
+    Number(state.balance).toFixed(2);
+
+  document.getElementById('manageYesterday').value=
+    Number(state.yesterday).toFixed(2);
+
+  document.getElementById('manageAnteYesterday').value=
+    Number(state.anteYesterday).toFixed(2);
+
+  document.getElementById('manageMonth').value=
+    Number(state.month).toFixed(2);
+
+  document.getElementById('manageModal').classList.add('show');
+
+  document.getElementById('manageModal').setAttribute(
+    'aria-hidden','false'
+  );
+
+  renderSavedGains();
+}
+
+
+function closeManage(){
+
+  document.getElementById('manageModal').classList.remove('show');
+
+  document.getElementById('manageModal').setAttribute(
+    'aria-hidden','true'
+  );
+}
+
+
+function saveAllValues(){
+
+  const balance=Number(
+    document.getElementById('manageBalance').value
+  );
+
+  const yesterday=Number(
+    document.getElementById('manageYesterday').value
+  );
+
+  const anteYesterday=Number(
+    document.getElementById('manageAnteYesterday').value
+  );
+
+  const month=Number(
+    document.getElementById('manageMonth').value
+  );
+
+  if(
+    !Number.isFinite(balance)||balance<0||
+    !Number.isFinite(yesterday)||yesterday<0||
+    !Number.isFinite(anteYesterday)||anteYesterday<0||
+    !Number.isFinite(month)||month<0
+  ){
+
+    showToast('Verifique os valores inseridos');
+    return;
+  }
+
+  state.balance=balance;
+  state.yesterday=yesterday;
+  state.anteYesterday=anteYesterday;
+  state.month=month;
+
+  save();
+  render();
+  closeManage();
+
+  showToast('Todos os valores foram salvos');
+}
+
+
+/* ==========================
+   GANHOS
+========================== */
+
+function renderGains(){
+
+  const list=document.getElementById('earnList');
+
+  list.innerHTML='';
+
+  state.gains.slice(0,30).forEach(g=>{
+
+    for(let i=0;i<g.videos;i++){
+
+      const item=document.createElement('div');
+
+      item.className='earn';
+
+      item.innerHTML=
+        '<span>'+
+        escapeHtml(g.description||'Assistiu um vídeo')+
+        (g.time?
+          ' <small style="color:#777">'+
+          escapeHtml(g.time)+
+          '</small>'
+        :'')+
+        '</span>'+
+        '<span class="money editable-value" data-gain-id="'+
+        escapeHtml(g.id)+
+        '">+$'+
+        Number(g.value).toFixed(2).replace('.',',')+
+        '</span>';
+
+      item.querySelector('.money').onclick=()=>{
+        editGain(item.querySelector('.money'));
+      };
+
+      list.appendChild(item);
+    }
+  });
+}
+
+
+function editGain(el){
+
+  const id=el.dataset.gainId;
+
+  const g=state.gains.find(x=>x.id===id);
+
+  const current=g?
+    g.value:
+    Number(
+      el.textContent
+      .replace(/[^0-9,.-]/g,'')
+      .replace(',','.')
+    );
+
+  const raw=prompt(
+    'Novo valor deste ganho em US$:',
+    Number(current).toFixed(2)
+  );
+
+  if(raw===null)return;
+
+  const value=Number(
+    String(raw).replace(',','.')
+  );
+
+  if(!Number.isFinite(value)||value<0){
+
+    showToast('Valor inválido');
+    return;
+  }
+
+  if(g){
+
+    g.value=value;
+
+    save();
+    render();
+
+  }else{
+
+    el.textContent=money(value,true);
+  }
+
+  showToast('Ganho atualizado e salvo');
+}
+
+
+function saveGain(){
+
+  const value=Number(
+    document.getElementById('gainValue').value
+  );
+
+  const videos=Math.floor(
+    Number(document.getElementById('gainVideos').value)
+  );
+
+  const time=document.getElementById('gainTime').value;
+
+  const description=
+    document.getElementById('gainDescription').value.trim()||
+    'Assistiu um vídeo';
+
+  if(
+    !Number.isFinite(value)||
+    value<=0||
+    !videos||
+    videos<1
+  ){
+
+    showToast('Preencha valor e quantidade de vídeos');
+    return;
+  }
+
+  state.gains.unshift({
+    id:'g'+Date.now()+Math.floor(Math.random()*1000),
+    value,
+    videos,
+    time,
+    description,
+    createdAt:Date.now()
+  });
+
+  state.today+=value*videos;
+  state.month+=value*videos;
+  state.balance+=value*videos;
+
+  save();
+  render();
+  renderSavedGains();
+
+  document.getElementById('gainValue').value='';
+  document.getElementById('gainVideos').value='';
+  document.getElementById('gainDescription').value='';
+
+  showToast('Ganho salvo automaticamente');
+}
+
+
+function renderSavedGains(){
+
+  const box=document.getElementById('savedGains');
+
+  if(!box)return;
+
+  box.innerHTML=
+    state.gains.length?
+    state.gains.slice(0,10).map(g=>
+      '<div class="saved-gain">'+
+      '<span>'+
+      escapeHtml(g.description)+
+      ' · '+
+      g.videos+
+      ' vídeo(s) · '+
+      escapeHtml(g.time||'sem hora')+
+      '</span>'+
+      '<b>+$'+
+      Number(g.value*g.videos).toFixed(2)+
+      '</b>'+
+      '</div>'
+    ).join(''):
+    '<div class="notice">Nenhum ganho adicionado ainda.</div>';
+}
+
+
+/* ==========================
+   GALERIA
+========================== */
+
+function openGallery(){
+
+  document.getElementById('galleryModal').classList.add('show');
+
+  document.getElementById('galleryModal').setAttribute(
+    'aria-hidden','false'
+  );
+}
+
+
+function closeGallery(){
+
+  document.getElementById('galleryModal').classList.remove('show');
+
+  document.getElementById('galleryModal').setAttribute(
+    'aria-hidden','true'
+  );
+}
+
+
+document.getElementById('imagePicker').addEventListener(
+  'change',
+  function(){
+
+    const f=this.files[0];
+
+    if(!f)return;
+
+    const url=URL.createObjectURL(f);
+
+    document.getElementById('previewImage').src=url;
+
+    document.getElementById('uploadPreview').style.display='block';
+  }
+);
+
+
+function saveImportedImage(){
+
+  const file=
+    document.getElementById('imagePicker').files[0];
+
+  const seconds=Math.floor(
+    Number(document.getElementById('videoSeconds').value)
+  );
+
+  if(!file){
+
+    showToast('Escolha uma imagem da galeria');
+    return;
+  }
+
+  if(!seconds||seconds<1){
+
+    showToast('Duração inválida');
+    return;
+  }
+
+  const reader=new FileReader();
+
+  reader.onload=()=>{
+
+    state.images.unshift({
+      src:reader.result,
+      seconds,
+      createdAt:Date.now()
+    });
+
+    state.images=state.images.slice(0,8);
+
+    save();
+    renderImages();
+    closeGallery();
+
+    showToast('Imagem salva na plataforma');
+  };
+
+  reader.readAsDataURL(file);
+}
+
+
+function renderImages(){
+
+  const row=document.getElementById('videoRow');
+
+  if(!row)return;
+
+  row.querySelectorAll('.imported').forEach(x=>x.remove());
+
+  state.images.forEach((v,i)=>{
+
+    const d=document.createElement('div');
+
+    d.className='video imported';
+
+    d.innerHTML=
+      '<img src="'+v.src+'" alt="Imagem importada">'+
+      '<div class="play">▶</div>'+
+      '<div class="video-count">Vídeo '+(i+4)+'</div>'+
+      '<div class="video-duration">'+v.seconds+'s</div>'+
+      '<button class="video-delete" onclick="removeImportedVideo('+i+',event)" aria-label="Eliminar vídeo">×</button>';
+
+    row.appendChild(d);
+  });
+}
+
+
+function removeVideo(btn,event){
+
+  event.stopPropagation();
+
+  const card=btn.closest('.video');
+
+  if(card.classList.contains('imported'))return;
+
+  card.remove();
+
+  showToast('Vídeo eliminado');
+}
+
+
+function removeImportedVideo(index,event){
+
+  event.stopPropagation();
+
+  if(!confirm('Eliminar este vídeo?'))return;
+
+  state.images.splice(index,1);
+
+  save();
+  renderImages();
+
+  showToast('Vídeo eliminado');
+}
+
+
+/* ==========================
+   NAVEGAÇÃO
+========================== */
+
+document.querySelectorAll('.nav').forEach(btn=>
+
+  btn.addEventListener('click',()=>{
+
+    const id=btn.dataset.page;
+
+    if(id==='videos'){
+
+      showToast('Área de vídeos demonstrativa');
+      return;
+    }
+
+    document.querySelectorAll('.page')
+      .forEach(p=>p.classList.remove('active'));
+
+    pages[id].classList.add('active');
+
+    document.querySelectorAll('.nav')
+      .forEach(n=>n.classList.remove('active'));
+
+    btn.classList.add('active');
+
+    window.scrollTo({
+      top:0,
+      behavior:'smooth'
+    });
+  })
+);
+
+
+/* ==========================
+   SAQUE
+========================== */
+
+function startWithdraw(){
+
+  const amount=Number(
+    document.getElementById('withdrawAmount').value
+  );
+
+  if(!amount||amount<=0){
+
+    showToast('Digite um valor válido');
+    return;
+  }
+
+  if(amount>Number(state.balance)){
+
+    showToast('Saldo insuficiente');
+    return;
+  }
+
+  selectedWithdrawAmount=amount;
+
+  document.getElementById('confirmAmount').textContent=
+    money(amount);
+
+  document.getElementById('successAmount').textContent=
+    money(amount);
+
+  document.getElementById('withdrawModal').classList.add('show');
+
+  document.getElementById('withdrawModal').setAttribute(
+    'aria-hidden','false'
+  );
+
+  showFlowStep(1);
+
+  clearTimeout(flowTimer);
+
+  flowTimer=setTimeout(
+    ()=>showFlowStep(2),
+    1800
+  );
+}
+
+
+function showFlowStep(n){
+
+  document.querySelectorAll('.flow-step')
+    .forEach(x=>x.classList.remove('active'));
+
+  document.getElementById('flowStep'+n)
+    .classList.add('active');
+
+  if(n===3)runProcessing();
+}
+
+
+function confirmCard(){
+
+  showFlowStep(3);
+}
+
+
+function runProcessing(){
+
+  let progress=0;
+
+  const bar=
+    document.getElementById('progressBar');
+
+  const text=
+    document.getElementById('processingText');
+
+  bar.style.width='0%';
+
+  const messages=[
+    'Validando os dados do pedido...',
+    'Confirmando o cartão virtual...',
+    'Calculando o valor do levantamento...',
+    'Registrando a operação...',
+    'Finalizando o processamento...'
+  ];
+
+  let i=0;
+
+  const timer=setInterval(()=>{
+
+    progress+=20;
+
+    bar.style.width=progress+'%';
+
+    text.textContent=
+      messages[Math.min(i,messages.length-1)];
+
+    i++;
+
+    if(progress>=100){
+
+      clearInterval(timer);
+
+      setTimeout(
+        ()=>showFlowStep(4),
+        500
+      );
+    }
+
+  },650);
+}
+
+
+function finishWithdraw(){
+
+  const amount=Number(selectedWithdrawAmount||0);
+
+  if(amount<=0)return;
+
+  /*
+   * O saque reduz o saldo atual imediatamente.
+   * O valor nunca poderá deixar o saldo abaixo de zero.
+   */
+
+  state.balance=
+    Math.max(
+      0,
+      Number(state.balance)-amount
+    );
+
+  save();
+  render();
+
+  const now=new Date();
+
+  const ref=
+    'VG-'+
+    Math.floor(100000+Math.random()*900000);
+
+  document.getElementById('successRef').textContent=ref;
+
+  document.getElementById('successDate').textContent=
+    now.toLocaleDateString('pt-PT');
+
+  document.getElementById('successTime').textContent=
+    now.toLocaleTimeString(
+      'pt-PT',
+      {
+        hour:'2-digit',
+        minute:'2-digit'
+      }
+    );
+
+  showFlowStep(5);
+}
+
+
+function closeWithdraw(){
+
+  document.getElementById('withdrawModal')
+    .classList.remove('show');
+
+  document.getElementById('withdrawModal')
+    .setAttribute('aria-hidden','true');
+
+  document.getElementById('withdrawAmount').value='';
+
+  showToast('Levantamento concluído');
+}
+
+
+/* ==========================
+   CARTÃO
+========================== */
+
+function saveDemoCard(){
+
+  const name=
+    (
+      document.getElementById('cardName').value||
+      'NOME DEMO'
+    ).trim().toUpperCase();
+
+  const expiry=
+    (
+      document.getElementById('cardExpiry').value||
+      '12/30'
+    ).trim();
+
+  document.getElementById('cardNameView').textContent=
+    name.slice(0,20);
+
+  document.getElementById('cardExpiryView').textContent=
+    expiry;
+
+  document.getElementById('withdrawCardName').textContent=
+    name.slice(0,20);
+
+  document.getElementById('withdrawCardExpiry').textContent=
+    expiry;
+
+  showToast('Cartão de teste atualizado');
+}
+
+
+function clearDemoCard(){
+
+  [
+    'cardName',
+    'cardNumber',
+    'cardExpiry',
+    'cardCvv'
+  ].forEach(id=>
+    document.getElementById(id).value=''
+  );
+
+  document.getElementById('cardNameView').textContent=
+    'NOME DEMO';
+
+  document.getElementById('cardExpiryView').textContent=
+    '12/30';
+
+  document.getElementById('withdrawCardName').textContent=
+    'NOME DEMO';
+
+  document.getElementById('withdrawCardExpiry').textContent=
+    '12/30';
+
+  showToast('Campos limpos');
+}
+
+
+/* ==========================
+   UTILIDADES
+========================== */
+
+function escapeHtml(value){
+
+  return String(value)
+    .replace(/&/g,'&amp;')
+    .replace(/</g,'&lt;')
+    .replace(/>/g,'&gt;')
+    .replace(/"/g,'&quot;')
+    .replace(/'/g,'&#039;');
+}
+
+
+function showToast(msg){
+
+  const t=document.getElementById('toast');
+
+  t.textContent=msg;
+
+  t.classList.add('show');
+
+  clearTimeout(window.toastTimer);
+
+  window.toastTimer=setTimeout(
+    ()=>t.classList.remove('show'),
+    2200
+  );
+}
+
+
+/* ==========================
+   INICIALIZAÇÃO
+========================== */
+
+render();
+
+</script>
+</body>
+  </html>
